@@ -8,6 +8,12 @@ set -e
 BUILD_KERNEL_MODULES=`read_property BUILD_KERNEL_MODULES`
 
 echo "*** GENERATE ROOTFS BEGIN ***"
+#FELIX,patch
+set +e
+  echo ">>umount $WORK_DIR/uefi"
+  umount $WORK_DIR/uefi
+  mount
+set -e 
 
 echo "Preparing rootfs work area. This may take a while."
 rm -rf $ROOTFS

@@ -92,9 +92,9 @@ prepare_boot_uefi() {
   loader_size=`du -b $LOADER | awk '{print \$1}'`
 
   # The EFI boot image is 64KB bigger than the kernel size.
-#FELIX,patch
+
 #  image_size=$((kernel_size + rootfs_size + loader_size + 65536))
-  image_size=$((kernel_size + rootfs_size + loader_size + (10*1024*1024) ))
+  image_size=$((kernel_size + rootfs_size + loader_size + (100*1024*1024) ))
 
   echo "Creating UEFI boot image file '$WORK_DIR/uefi.img'."
   rm -f $WORK_DIR/uefi.img
@@ -137,6 +137,28 @@ prepare_boot_uefi() {
 
   echo "Setting the default UEFI boot entry."
   sed -i "s|default.*|default mll-$MLL_CONF|" $WORK_DIR/uefi/loader/loader.conf
+
+  echo ">>>FELIX: add customized files"
+  date > $WORK_DIR/uefi/felix.txt
+  echo "Test" > $WORK_DIR/uefi/minimal/a.txt
+  echo "Test" > $WORK_DIR/uefi/EFI/BOOT/b1.txt
+  #cat /boot/initrd.img > $WORK_DIR/uefi/minimal/initrd.img
+  echo "Test"          > $WORK_DIR/uefi/use_ubuntu_vmlinuz.txt
+  rm -rf $WORK_DIR/uefi/minimal/x86_64
+  cat /boot/vmlinuz    > $WORK_DIR/uefi/minimal/vmlinuz
+  cp $WORK_DIR/rootfs.cpio.xz $WORK_DIR/uefi/minimal/rootfs.xz
+  cp $SRC_DIR/minimal_boot/uefi/loader/loader.conf $WORK_DIR/uefi/loader
+  cp $SRC_DIR/minimal_boot/uefi/loader/entries/faca.conf $WORK_DIR/uefi/loader/entries
+  
+  echo ">>>FELIX: loader config"
+  cat $WORK_DIR/uefi/loader/loader.conf
+  rm -rf cat $WORK_DIR/uefi/loader/entries/*.conf
+  cat $WORK_DIR/uefi/loader/entries/faca.conf
+
+  cp -rf $SRC_DIR/faca/* $WORK_DIR/uefi/
+  df -h
+
+  sleep 5
 
   echo "Unmounting UEFI boot image file."
   sync

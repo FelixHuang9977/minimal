@@ -7,7 +7,20 @@ set -e
 
 # Generate ISO image for UEFI based systems.
 uefi() {
+  echo ">>[uefi] ISIOIMAGE: $ISOIMAGE"
+  echo ">>[uefi] PWD: ${PWD}"
+
   cd $ISOIMAGE
+
+  #FELIX
+  echo "FELIX: patch"
+  ls -l $ISOIMAGE\
+  #cp $SRC_DIR/minimal_boot/uefi/loader/loader.conf $WORK_DIR/uefi/loader
+  #cp $SRC_DIR/minimal_boot/uefi/loader/entries/faca.conf $WORK_DIR/uefi/loader/entries
+  
+  #cat $WORK_DIR/uefi/loader/loader.conf
+  #cat $WORK_DIR/uefi/loader/entries/faca.conf
+  
 
   # Now we generate 'hybrid' ISO image file which can also be used on
   # USB flash drive, e.g. 'dd if=minimal_linux_live.iso of=/dev/sdb'.
@@ -40,8 +53,21 @@ bios() {
 
 # Generate ISO image for both BIOS and UEFI based systems.
 both() {
+  echo ">>[both] ISIOIMAGE: $ISOIMAGE"
+
   cd $ISOIMAGE
 
+
+  rm -rf $WORK_DIR/uefi/minimal/x86_64
+  cat /boot/vmlinuz    > $WORK_DIR/uefi/minimal/vmlinuz
+  cp $WORK_DIR/rootfs.cpio.xz $WORK_DIR/uefi/minimal/rootfs.xz
+  cp $SRC_DIR/minimal_boot/uefi/loader/loader.conf $WORK_DIR/uefi/loader
+  cp $SRC_DIR/minimal_boot/uefi/loader/entries/faca.conf $WORK_DIR/uefi/loader/entries
+  
+  cat $WORK_DIR/uefi/loader/loader.conf
+  cat $WORK_DIR/uefi/loader/entries/faca.conf
+
+set -x
   xorriso -as mkisofs \
     -isohybrid-mbr $WORK_DIR/syslinux/syslinux-*/bios/mbr/isohdpfx.bin \
     -c boot/syslinux/boot.cat \
@@ -55,6 +81,7 @@ both() {
       -isohybrid-gpt-basdat \
     -o $SRC_DIR/minimal_linux_live.iso \
   $ISOIMAGE
+set +x
 }
 
 echo "*** GENERATE ISO BEGIN ***"
